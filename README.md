@@ -1,2 +1,2 @@
-# vscode-f-ast
+# vscode-fast
 Visual Studio Code extension for fAST
