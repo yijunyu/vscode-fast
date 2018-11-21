@@ -14,9 +14,17 @@ import {
 	DidChangeConfigurationNotification,
 	CompletionItem,
 	CompletionItemKind,
-	TextDocumentPositionParams
+	TextDocumentPositionParams,
+	DocumentHighlight
 } from 'vscode-languageserver';
-
+import { execSync } from 'child_process';
+function delay(milliseconds, count) {
+	return new Promise(function (resolve) {
+		setTimeout(function () {
+			resolve(count);
+		}, milliseconds);
+	});
+}
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
@@ -127,43 +135,46 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	// The validator creates diagnostics for all uppercase words length 2 and more
 	let text = textDocument.getText();
-	let pattern = /\b[A-Z]{2,}\b/g;
-	let m: RegExpExecArray | null;
-
+	const fs = require('fs');
+	const w = fs.createWriteStream('file.java');
+	const Readable = require('stream').Readable;
+	var s = new Readable();
+	s._read = function noop() {}; // redundant? see update below
+	s.push(text);
+	s.push(null);
+	s.pipe(w);
+	await delay(500, 1);
+	execSync('fast -p file.java file.pb');
+	var out = execSync('fast -z -y1 file.pb');
 	let problems = 0;
 	let diagnostics: Diagnostic[] = [];
-	while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-		problems++;
-		let diagnosic: Diagnostic = {
-			severity: DiagnosticSeverity.Warning,
-			range: {
-				start: textDocument.positionAt(m.index),
-				end: textDocument.positionAt(m.index + m[0].length)
-			},
-			message: `${m[0]} is all uppercase.`,
-			source: 'ex'
-		};
-		if (hasDiagnosticRelatedInformationCapability) {
-			diagnosic.relatedInformation = [
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnosic.range)
-					},
-					message: 'Spelling matters'
+	var lines = out.toString().split('\n');
+	var pos = 0;
+	var text_lines = text.split("\n");
+	for (var i=0; i<lines.length; i++) {
+		var values = lines[i].split(',');
+		if (values.length == 8) {
+			var id = +values[0];
+			var kind = values[1];
+			var lineno = +values[2];
+			var column = +values[3];
+			var end_lineno = +values[4];
+			var end_column = +values[5];
+			var weight = +values[6];
+			var color = values[7];
+			problems ++;
+			let diagnostic: Diagnostic = {
+				severity: DiagnosticSeverity.Warning,
+				range: {
+					start: textDocument.positionAt(textDocument.offsetAt({line: lineno - 1, character: 0})+column-1),
+					end: textDocument.positionAt(textDocument.offsetAt({line: end_lineno - 1, character: 0})+end_column-1)
 				},
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnosic.range)
-					},
-					message: 'Particularly for names'
-				}
-			];
-		}
-		diagnostics.push(diagnosic);
+				message: `Element ${id} is of type ${kind} in ${color}.`,
+				source: 'AST'
+			};	
+			diagnostics.push(diagnostic);
+		}		
 	}
-
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
