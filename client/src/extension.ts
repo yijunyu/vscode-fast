@@ -1,10 +1,6 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
-
+import * as vscode from 'vscode';
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, window } from 'vscode';
 
 import {
 	LanguageClient,
@@ -13,9 +9,30 @@ import {
 	TransportKind
 } from 'vscode-languageclient';
 
+function getWebviewContent(context: vscode.ExtensionContext) {
+	var fs = require("fs");
+	var text = fs.readFileSync(path.join(vscode.workspace.rootPath, "./file.html"));
+	return text;
+}
+
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
+	context.subscriptions.push(
+		vscode.commands.registerCommand('bigCoding.start', () => {
+			// Create and show panel
+			const panel = vscode.window.createWebviewPanel(
+				'Attention to Code: Interpreting Big Code Classification Decisions',
+				'Big Coding',
+				vscode.ViewColumn.One,
+				{}
+			);
+
+			// And set its HTML content
+			panel.webview.html = getWebviewContent(context);
+		})
+	);
+
 	// The server is implemented in node
 	let serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
@@ -38,7 +55,7 @@ export function activate(context: ExtensionContext) {
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'java' }],
+		documentSelector: [{ scheme: 'file', language: 'cpp' }],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')

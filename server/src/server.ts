@@ -17,6 +17,7 @@ import {
 	TextDocumentPositionParams,
 	DocumentHighlight
 } from 'vscode-languageserver';
+
 import { execSync } from 'child_process';
 function delay(milliseconds, count) {
 	return new Promise(function (resolve) {
@@ -136,7 +137,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// The validator creates diagnostics for all uppercase words length 2 and more
 	let text = textDocument.getText();
 	const fs = require('fs');
-	const w = fs.createWriteStream('file.java');
+	const w = fs.createWriteStream('file.cpp');
 	const Readable = require('stream').Readable;
 	var s = new Readable();
 	s._read = function noop() {}; // redundant? see update below
@@ -144,7 +145,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	s.push(null);
 	s.pipe(w);
 	await delay(500, 1);
-	execSync('fast -p file.java file.pb');
+	execSync('fast -p file.cpp file.pb');
+	execSync('fast -H 0 -a 0 -t -y file.csv file.pb > file.html');
 	var out = execSync('fast -z -y1 file.pb');
 	let problems = 0;
 	let diagnostics: Diagnostic[] = [];

@@ -15,7 +15,7 @@
 		".vscode-test"
 	],
 	"references": [
-		{ "path": "./client", "composite": true },
-		{ "path": "./server", "composite": true }
+		{ "path": "./client"},
+		{ "path": "./server"}
 	]
 }
