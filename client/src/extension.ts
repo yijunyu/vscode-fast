@@ -11,7 +11,8 @@ import {
 
 function getWebviewContent(context: vscode.ExtensionContext) {
 	var fs = require("fs");
-	var text = fs.readFileSync(path.join(vscode.workspace.rootPath, "./file.html"));
+	var text = fs.readFileSync(path.join(vscode.workspace.rootPath, "./file_" 
+		+ workspace.getConfiguration('bigcoding.model') + ".html"));
 	return text;
 }
 
@@ -27,7 +28,6 @@ export function activate(context: ExtensionContext) {
 				vscode.ViewColumn.One,
 				{}
 			);
-
 			// And set its HTML content
 			panel.webview.html = getWebviewContent(context);
 		})

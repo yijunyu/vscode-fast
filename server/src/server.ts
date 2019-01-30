@@ -2,7 +2,6 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-
 import {
 	createConnection,
 	TextDocuments,
@@ -146,7 +145,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	s.pipe(w);
 	await delay(500, 1);
 	execSync('fast -p file.cpp file.pb');
-	execSync('fast -H 0 -a 0 -t -y file.csv file.pb > file.html');
+	execSync('fast -m ' + connection.workspace.getConfiguration('bigcoding.model') + ' file.cpp');
 	var out = execSync('fast -z -y1 file.pb');
 	let problems = 0;
 	let diagnostics: Diagnostic[] = [];

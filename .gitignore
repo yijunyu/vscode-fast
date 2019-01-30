@@ -5,3 +5,6 @@ client/server
 file.java
 file.pb
 file.txt
+client/completion.txt
+requirements.txt
+client/diagnostics.txt
