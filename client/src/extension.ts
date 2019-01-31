@@ -11,8 +11,9 @@ import {
 
 function getWebviewContent(context: vscode.ExtensionContext) {
 	var fs = require("fs");
-	var text = fs.readFileSync(path.join(vscode.workspace.rootPath, "./file_" 
-		+ workspace.getConfiguration('bigcoding.model') + ".html"));
+	// var text = fs.readFileSync(path.join(vscode.workspace.rootPath, "./file_" 
+	// 	+ workspace.getConfiguration('bigcoding.model') + ".html"));
+	var text = fs.readFileSync(path.join(vscode.workspace.rootPath, "./file.html"));
 	return text;
 }
 
@@ -55,7 +56,7 @@ export function activate(context: ExtensionContext) {
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'cpp' }],
+		documentSelector: [{ scheme: 'file', language: 'cpp' }, { scheme: 'file', language: 'java' }, ],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
