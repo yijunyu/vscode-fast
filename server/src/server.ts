@@ -145,7 +145,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	s.pipe(w);
 	await delay(500, 1);
 	execSync('fast -p file.cpp file.pb');
-	// execSync('fast -m ' + connection.workspace.getConfiguration('bigcoding.model') + ' file.cpp');
 	execSync('fast -H 0 -a 0 -x file.csv file.pb > file.html');
 	var out = execSync('fast -z -y1 file.pb');
 	let problems = 0;
