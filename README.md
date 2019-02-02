@@ -14,7 +14,7 @@ cp scripts/fast ~/bin/fast
 2. The "PROGRAM" diagnostic window lists the AST nodes with information about their type, lineno, column number, etc.;
 3. Click at an AST node item in the diagnostic window, it selects the corresponding code in the editor;
 4. Enter "bigCoding" command by ⌘ + P, >, Big Coding, it opens a configuration view as a form to change how attention scores are computed;
-![Configuration Window](configuration.png)
+![Configuration Window](config.png)
    1. The `Model` drop down list presents all the pretrained models for computing the attention scores for the AST nodes;
    2. The `Attnention=accumulation` option suggests that the attention score will be accumulated when traversing the tree from top;
    3. The `Weight=raw` option suggests that the attention score will be used as is, while `Weight=scaled` option suggests that the attention score will be scaled up to maximum=1;
