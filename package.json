@@ -68,7 +68,6 @@
 	},
 	"dependencies": {
 		"child_process": "^1.0.2",
-		"tsc": "^1.20150623.0",
-		"vscode": "*"
+		"tsc": "^1.20150623.0"
 	}
 }

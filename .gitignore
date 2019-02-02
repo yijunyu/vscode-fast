@@ -8,3 +8,4 @@ file.txt
 client/completion.txt
 requirements.txt
 client/diagnostics.txt
+fast-*.vsix

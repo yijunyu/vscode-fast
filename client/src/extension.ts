@@ -125,8 +125,12 @@ export function activate(context: ExtensionContext) {
 				message => {
 					const panel = vscode.window.createWebviewPanel(
 						'Attention to Code: View',
-						'HSB View',
-						vscode.ViewColumn.Three,
+						path.basename(doc) + "(" 
+							+ message.attention + ","
+							+ message.weight + "," 
+							+ message.node + "," 
+							+ message.model + ")",
+						vscode.ViewColumn.One,
 						{	enableScripts: true,
 							retainContextWhenHidden: true,
 						}
