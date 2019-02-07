@@ -19,6 +19,8 @@ import {
 
 import { execSync } from 'child_process';
 import { PassThrough } from 'stream';
+import {tempfile} from 'tempfile';
+
 function delay(milliseconds, count) {
 	return new Promise(function (resolve) {
 		setTimeout(function () {
@@ -137,8 +139,11 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	let text = textDocument.getText();
 	const fs = require('fs');
 	const path= require('path');
+	const tempfile = require('tempfile');
 	var ext = path.extname(textDocument.uri);
-	const w = fs.createWriteStream('file' + ext);
+	var src_filename = tempfile(ext);
+	var pb_filename = tempfile('.pb');
+	const w = fs.createWriteStream(src_filename);
 	const Readable = require('stream').Readable;
 	var s = new Readable();
 	s._read = function noop() {}; // redundant? see update below
@@ -146,8 +151,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	s.push(null);
 	s.pipe(w);
 	await delay(500, 1);
-	execSync('fast -p file' + ext + ' file.pb');
-	var out = execSync('fast -z -y1 file.pb');
+	execSync('fast -p ' + src_filename + ' ' + pb_filename);
+	var out = execSync('fast -z -y1 ' + pb_filename);
 	let problems = 0;
 	let diagnostics: Diagnostic[] = [];
 	var lines = out.toString().split('\n');
@@ -179,6 +184,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	}
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+	fs.unlinkSync(src_filename);
+	fs.unlinkSync(pb_filename);
 }
 
 connection.onDidChangeWatchedFiles(_change => {
