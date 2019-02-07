@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { workspace, ExtensionContext, commands, Uri, window } from 'vscode';
 import { execSync } from 'child_process';
+import {tempfile} from 'tempfile';
 
 import {
 	LanguageClient,
@@ -11,20 +12,31 @@ import {
 } from 'vscode-languageclient';
 
 function getWebviewContent3(context: vscode.ExtensionContext, doc: String, message: any) {
-	var fs = require("fs");
-	var path = require('path');
+	const fs = require("fs");
+	const path = require('path');
+	const tempfile = require('tempfile');
 	var dirname = path.dirname(doc);
-	var filename = path.basename(doc, '.cpp');
-	var pb_filename = path.join(dirname, filename + '.pb');
-	var html_filename = path.join(dirname, filename + '.html');
-	var csv_filename = path.join(dirname, filename + "_" + message.weight + "_attention_" + message.node + ".csv");
-	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename);
+	var ext = path.extname(doc);
+	var filename = path.basename(doc, ext);
+	var pb_filename = tempfile('.pb');
+	var html_filename = tempfile('.html');
+	// var pb_filename = path.join(dirname, filename + '.pb');
+	// var html_filename = path.join(dirname, filename + '.html');
+	var csv_filename = path.join(dirname, filename, filename + "_" 
+		+ (message.polling != ""? message.polling + "_" : "") 
+		+ (message.weight != "" ? message.weight + "_" : "") 
+		+ (message.node != "" ? message.node : "")
+		+ ".csv");
+	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
 	var accumulated = "0";
 	if (message.attention === "accumulation") 
 		accumulated = "1";
+	
 	execSync('fast -p ' + doc + ' ' + pb_filename);
 	execSync('fast -H 0 -a ' + accumulated + ' -x ' + csv_filename + ' ' + pb_filename + '> ' + html_filename);
 	var text = fs.readFileSync(html_filename);
+	fs.unlinkSync(pb_filename);
+	fs.unlinkSync(html_filename);
 	return text;
 }
 
@@ -35,8 +47,7 @@ function getWebviewContent(context: vscode.ExtensionContext) {
 	for (var i=0; i <files.length; i++) {
 		models = models + `<option value="`+ files[i] + `">` + files[i] + `</option>`;
 	}
-	var text = `<!DOCTYPE html>
-	<html lang="en">
+	var text = `<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,51 +60,62 @@ function getWebviewContent(context: vscode.ExtensionContext) {
 		+ models +
 		`</select>
 		<fieldset>
-			<legend>Attention:</legend>
-			<input type="radio" id="att0" name="attention" value="normal" checked> Normal<br>
-			<input type="radio" id="att1" name="attention" value="accumulation"> Accumulation<br>
+			<legend>Aggregating method:</legend>
+			<input type="radio" name="polling" value=""> None<br>
+			<input type="radio" name="polling" value="sum_sigmoid" checked> Sum Sigmoid<br>
+			<input type="radio" name="polling" value="sum_softmax"> Sum Softmax<br>
+			<input type="radio" name="polling" value="normal"> Normal<br>
+			<input type="radio" name="polling" value="accumulation"> Accumulation<br>
 		</fieldset>
 		<fieldset>
-			<legend>Weights:</legend>
-			<input type="radio" id="raw" name="weight" value="raw" checked> Raw<br>
-			<input type="radio" id="scaled" name="weight" value="scaled"> Scaled<br>
+			<legend>Attention method:</legend>
+			<input type="radio" name="weight" value="attention_all_1" checked> All 1<br>
+			<input type="radio" name="weight" value="raw_attention" checked> Raw<br>
+			<input type="radio" name="weight" value="scaled_attention"> Scaled<br>
 		</fieldset>
 		<fieldset>
-			<legend>With Node Type:</legend>
-			<input type="radio" id="yes" name="node" value="with_node_type" checked> Yes<br>
-			<input type="radio" id="no" name="node" value="without_node_type"> No<br>
+			<legend>Node types:</legend>
+			<input type="radio" name="node" value="with_node_type_and_subtree_size" checked> With Node Type and Subtree Size<br>
+			<input type="radio" name="node" value="only_node_type"> Only Node Type<br>
+			<input type="radio" name="node" value="without_node_type"> Without Node Type<br>
 		</fieldset>
 		</form>
 		<div id="message"></div>
 		<script>
 			const vscode = acquireVsCodeApi();
-			function post() {
+			function get_value(name) {
+				var value = "";
+				var x = document.getElementsByName(name);
+				for (var i = 0; i < x.length; i++) {
+					if (x[i].type == "radio" && x[i].checked) {
+						value = x[i].value;
+					}
+				}
+				return value;
+			}
+
+			function post(event) {
+				var polling = get_value('polling');
+				var weight = get_value('weight');
+				var node = get_value('node');
 				var model_value = model.value;
-				var node_value = (yes.checked? yes.value: (no.checked? no.value : "none"));
-				var attention_value = (att0.checked? att0.value : (att1.checked? att1.value: "none"));
-				var weight_value = (raw.checked? raw.value : (scaled.checked? scaled.value: "none"));
 				vscode.postMessage({
-					attention: attention_value,
-					weight: weight_value,
-					node: node_value,
+				    polling: polling,
+					weight: weight,
+					node: node,
 					model: model_value
 				});
 			}
-			const att0 = document.getElementById('att0');
-			const att1 = document.getElementById('att1');
-			const raw = document.getElementById('raw');
-			const scaled = document.getElementById('scaled');
-			const yes = document.getElementById('yes');
-			const no = document.getElementById('no');
+			var x = document.getElementsByTagName('input');
+			var i;
+			for (i = 0; i < x.length; i++) {
+				if (x[i].type == "radio") {
+					x[i].onchange = (event) => {post(event)};
+				}
+			}
 			const model = document.getElementById('model');
 			const message = document.getElementById('message');
-			yes.onchange = (event) => {post();};
-			no.onchange = (event) => {post();};
-			att0.onchange = (event) => {post();};
-			att1.onchange = (event) => {post();};
-			raw.onchange = (event) => {post();};
-			scaled.onchange = (event) => {post();};
-			model.onchange = (event) => {post();};
+			model.onchange = (event) => {post(event);};
 		</script>
 	</body>
 	</html>`;

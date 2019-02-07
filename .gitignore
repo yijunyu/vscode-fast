@@ -9,3 +9,5 @@ client/completion.txt
 requirements.txt
 client/diagnostics.txt
 fast-*.vsix
+package-lock.json
+test.html

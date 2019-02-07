@@ -1,5 +1,5 @@
 {
-	"name": "lsp-sample-client",
+	"name": "fast-client",
 	"description": "VSCode part of a language server",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
@@ -17,7 +17,8 @@
 		"postinstall": "vscode-install"
 	},
 	"dependencies": {
-		"vscode-languageclient": "^4.1.4"
+		"vscode-languageclient": "^4.1.4",
+		"tempfile": "2.0.0"
 	},
 	"devDependencies": {
 		"vscode": "^1.1.21"

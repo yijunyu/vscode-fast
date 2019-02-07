@@ -18,6 +18,7 @@ import {
 } from 'vscode-languageserver';
 
 import { execSync } from 'child_process';
+import { PassThrough } from 'stream';
 function delay(milliseconds, count) {
 	return new Promise(function (resolve) {
 		setTimeout(function () {
@@ -28,7 +29,6 @@ function delay(milliseconds, count) {
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
-
 // Create a simple text document manager. The text document manager
 // supports full document sync only
 let documents: TextDocuments = new TextDocuments();
@@ -136,7 +136,9 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// The validator creates diagnostics for all uppercase words length 2 and more
 	let text = textDocument.getText();
 	const fs = require('fs');
-	const w = fs.createWriteStream('file.cpp');
+	const path= require('path');
+	var ext = path.extname(textDocument.uri);
+	const w = fs.createWriteStream('file' + ext);
 	const Readable = require('stream').Readable;
 	var s = new Readable();
 	s._read = function noop() {}; // redundant? see update below
@@ -144,8 +146,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	s.push(null);
 	s.pipe(w);
 	await delay(500, 1);
-	execSync('fast -p file.cpp file.pb');
-	execSync('fast -H 0 -a 0 -x file.csv file.pb > file.html');
+	execSync('fast -p file' + ext + ' file.pb');
 	var out = execSync('fast -z -y1 file.pb');
 	let problems = 0;
 	let diagnostics: Diagnostic[] = [];
