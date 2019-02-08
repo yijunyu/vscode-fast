@@ -27,6 +27,12 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 		+ (message.weight != "" ? message.weight + "_" : "") 
 		+ (message.node != "" ? message.node : "")
 		+ ".csv");
+
+	const curl = require('curlrequest');
+	curl.request({ url: 'https://raw.githubusercontent.com/lodash/lodash/master/lodash.js' }, function (err, stdout, meta) {
+		vscode.window.showErrorMessage('%s %s', meta.cmd, meta.args.join(' '));
+	});
+	
 	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
 	var accumulated = "0";
 	if (message.attention === "accumulation") 
