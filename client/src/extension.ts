@@ -35,10 +35,10 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 	// });
 
 	var ghdownload = require('github-download'), exec = require('exec');
-	var model_dir = context.extensionPath.toString() + "/model";
+	var model_dir = context.storagePath.toString() + "/model";
 	if (!fs.existsSync(model_dir)) {
 		vscode.window.showErrorMessage("download model folder: " + model_dir);
-		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'data'}, model_dir);
+		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'model'}, model_dir);
 	}
 	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
 	var accumulated = "0";

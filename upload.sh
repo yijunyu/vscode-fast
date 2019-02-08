@@ -1,3 +1,3 @@
-npm install child_process tempfile tsc vscode vscode-languageclient
-cd client && npm run update-vscode && cd .. && npm run compile
+npm install path child_process tempfile tsc fs vscode vscode-languageserver vscode vscode-languageserver vscode vscode-languageserver vscode vscode-languageserver
+cd client && npm install child_process && npm run update-vscode && cd .. && npm run compile
 vsce package
