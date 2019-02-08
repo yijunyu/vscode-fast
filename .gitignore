@@ -11,3 +11,5 @@ client/diagnostics.txt
 fast-*.vsix
 package-lock.json
 test.html
+tmp
+test.js

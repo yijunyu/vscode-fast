@@ -20,6 +20,7 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 	var filename = path.basename(doc, ext);
 	var pb_filename = tempfile('.pb');
 	var html_filename = tempfile('.html');
+	
 	// var pb_filename = path.join(dirname, filename + '.pb');
 	// var html_filename = path.join(dirname, filename + '.html');
 	var csv_filename = path.join(dirname, filename, filename + "_" 
@@ -28,11 +29,17 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 		+ (message.node != "" ? message.node : "")
 		+ ".csv");
 
-	const curl = require('curlrequest');
-	curl.request({ url: 'https://raw.githubusercontent.com/lodash/lodash/master/lodash.js' }, function (err, stdout, meta) {
-		vscode.window.showErrorMessage('%s %s', meta.cmd, meta.args.join(' '));
-	});
-	
+	// const curl = require('curlrequest');
+	// curl.request({ url: 'https://raw.githubusercontent.com/lodash/lodash/master/lodash.js' }, function (err, stdout, meta) {
+	// 	vscode.window.showErrorMessage('%s %s', meta.cmd, meta.args.join(' '));
+	// });
+
+	var ghdownload = require('github-download'), exec = require('exec');
+	var model_dir = context.extensionPath.toString() + "/model";
+	if (!fs.existsSync(model_dir)) {
+		vscode.window.showErrorMessage("download model folder: " + model_dir);
+		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'data'}, model_dir);
+	}
 	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
 	var accumulated = "0";
 	if (message.attention === "accumulation") 
