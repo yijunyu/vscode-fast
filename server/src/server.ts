@@ -19,7 +19,10 @@ import {
 
 import { execSync } from 'child_process';
 import { PassThrough } from 'stream';
-import {tempfile} from 'tempfile';
+const fs = require("fs");
+const path = require('path');
+const tempfile = require('tempfile');
+const fastCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp yijun/fast ';
 
 function delay(milliseconds, count) {
 	return new Promise(function (resolve) {
@@ -151,8 +154,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	s.push(null);
 	s.pipe(w);
 	await delay(500, 1);
-	execSync('fast -p ' + src_filename + ' ' + pb_filename);
-	var out = execSync('fast -z -y1 ' + pb_filename);
+	execSync(fastCmd + '-p ' + src_filename + ' ' + pb_filename);
+	var out = execSync(fastCmd + '-z -y1 ' + pb_filename);
 	let problems = 0;
 	let diagnostics: Diagnostic[] = [];
 	var lines = out.toString().split('\n');

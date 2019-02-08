@@ -12,7 +12,9 @@ import {
 const fs = require("fs");
 const path = require('path');
 const tempfile = require('tempfile');
-const ghdownload = require('github-download');
+const wgetCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp --entrypoint wget yijun/fast ';
+const unzipCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp --entrypoint unzip yijun/fast ';
+const fastCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' yijun/fast ';
 
 function updateView3(message, doc, csv_filename, pb_filename, html_filename) {
 	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
@@ -20,12 +22,19 @@ function updateView3(message, doc, csv_filename, pb_filename, html_filename) {
 	if (message.attention === "accumulation") 
 		accumulated = "1";
 	
-	execSync('fast -p ' + doc + ' ' + pb_filename);
-	execSync('fast -H 0 -a ' + accumulated + ' -x ' + csv_filename + ' ' + pb_filename + '> ' + html_filename);
+	execSync(fastCmd + '-p ' + doc + ' ' + pb_filename);
+	execSync(fastCmd + '-H 0 -a ' + accumulated + ' -x ' + csv_filename + ' ' + pb_filename + '> ' + html_filename);
 	var text = fs.readFileSync(html_filename);
 	fs.unlinkSync(pb_filename);
 	fs.unlinkSync(html_filename);
 	return text;	
+}
+
+function fetchModel(model_dir) {
+	var zip_filename = tempfile('.zip');
+	execSync(wgetCmd + 'https://github.com/yijunyu/vscode-fast/raw/model/model.zip -O ' + zip_filename);
+	execSync(unzipCmd + zip_filename + ' -d ' + model_dir);
+	fs.unlinkSync(zip_filename);
 }
 
 function getWebviewContent3(context: vscode.ExtensionContext, doc: String, message: any) {
@@ -43,22 +52,7 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 		+ (message.node != "" ? message.node : "")
 		+ ".csv");
 
-	// var model_dir = context.storagePath.toString() + "/model";
-	// var model_dir = "/tmp/model";
-	// var model_dir = vscode.workspace.workspaceFolders[0].uri.fsPath + "/model";
-	var model_dir = path.join(vscode.workspace.rootPath,'./model');
-	if (!fs.existsSync(model_dir)) {
-		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'model'}, model_dir)
-		.on('error', function (err) {
-			vscode.window.showErrorMessage("error in downloading: " + err);
-		})			
-		.on('end', function (err, stdout, stderr) {
-			vscode.window.showErrorMessage("downloaded model folder: " + model_dir);
-		});
-		return updateView3(message, doc, csv_filename, pb_filename, html_filename);
-	} else {
-		return updateView3(message, doc, csv_filename, pb_filename, html_filename);
-	}
+	return updateView3(message, doc, csv_filename, pb_filename, html_filename);
 }
 
 function updateView(model_dir) {
@@ -143,27 +137,15 @@ function updateView(model_dir) {
 }
 
 function getWebviewContent(context: vscode.ExtensionContext) {
-	var fs = require("fs");
-	var model_dir = path.join(vscode.workspace.rootPath,'./model');
-	if (!fs.existsSync(model_dir)) {
-		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'model'}, model_dir)
-		.on('error', function (err) {
-			vscode.window.showErrorMessage("error in downloading: " + err);
-		})			
-		.on('end', function (err, stdout, stderr) {
-			vscode.window.showErrorMessage("downloaded model folder: " + model_dir);
-		});
-		return updateView(model_dir);
-	} else {
-		return updateView(model_dir);
-	}
+	var model_dir = vscode.workspace.rootPath + "/model";
+	return updateView(model_dir);
 }
 
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
 	context.subscriptions.push(
-		vscode.commands.registerCommand('bigCoding.start', () => {
+		vscode.commands.registerCommand('bigCoding.start', async () => {
 			var doc = vscode.window.activeTextEditor.document.fileName;
 			// vscode.window.showErrorMessage(doc);
 
@@ -176,6 +158,10 @@ export function activate(context: ExtensionContext) {
 					retainContextWhenHidden: true,
 				}
 			);
+			var model_dir = vscode.workspace.rootPath;
+			if (!fs.existsSync(model_dir + "/model")) {
+				await fetchModel(model_dir);
+			} 		
 			// And set its HTML content
 			panel.webview.html = getWebviewContent(context);
 

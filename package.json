@@ -69,7 +69,6 @@
 	},
 	"dependencies": {
 		"child_process": "^1.0.2",
-		"github-download": "^0.5.0",
 		"tempfile": "^2.0.0",
 		"tsc": "^1.20150623.0"
 	}
