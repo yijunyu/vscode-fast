@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { workspace, ExtensionContext, commands, Uri, window } from 'vscode';
 import { execSync } from 'child_process';
-import {tempfile} from 'tempfile';
 
 import {
 	LanguageClient,
@@ -11,10 +9,26 @@ import {
 	TransportKind
 } from 'vscode-languageclient';
 
+const fs = require("fs");
+const path = require('path');
+const tempfile = require('tempfile');
+const ghdownload = require('github-download');
+
+function updateView3(message, doc, csv_filename, pb_filename, html_filename) {
+	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
+	var accumulated = "0";
+	if (message.attention === "accumulation") 
+		accumulated = "1";
+	
+	execSync('fast -p ' + doc + ' ' + pb_filename);
+	execSync('fast -H 0 -a ' + accumulated + ' -x ' + csv_filename + ' ' + pb_filename + '> ' + html_filename);
+	var text = fs.readFileSync(html_filename);
+	fs.unlinkSync(pb_filename);
+	fs.unlinkSync(html_filename);
+	return text;	
+}
+
 function getWebviewContent3(context: vscode.ExtensionContext, doc: String, message: any) {
-	const fs = require("fs");
-	const path = require('path');
-	const tempfile = require('tempfile');
 	var dirname = path.dirname(doc);
 	var ext = path.extname(doc);
 	var filename = path.basename(doc, ext);
@@ -29,37 +43,30 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 		+ (message.node != "" ? message.node : "")
 		+ ".csv");
 
-	// const curl = require('curlrequest');
-	// curl.request({ url: 'https://raw.githubusercontent.com/lodash/lodash/master/lodash.js' }, function (err, stdout, meta) {
-	// 	vscode.window.showErrorMessage('%s %s', meta.cmd, meta.args.join(' '));
-	// });
-
-	var ghdownload = require('github-download'), exec = require('exec');
-	var model_dir = context.storagePath.toString() + "/model";
+	// var model_dir = context.storagePath.toString() + "/model";
+	// var model_dir = "/tmp/model";
+	// var model_dir = vscode.workspace.workspaceFolders[0].uri.fsPath + "/model";
+	var model_dir = path.join(vscode.workspace.rootPath,'./model');
 	if (!fs.existsSync(model_dir)) {
-		vscode.window.showErrorMessage("download model folder: " + model_dir);
-		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'model'}, model_dir);
+		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'model'}, model_dir)
+		.on('error', function (err) {
+			vscode.window.showErrorMessage("error in downloading: " + err);
+		})			
+		.on('end', function (err, stdout, stderr) {
+			vscode.window.showErrorMessage("downloaded model folder: " + model_dir);
+		});
+		return updateView3(message, doc, csv_filename, pb_filename, html_filename);
+	} else {
+		return updateView3(message, doc, csv_filename, pb_filename, html_filename);
 	}
-	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
-	var accumulated = "0";
-	if (message.attention === "accumulation") 
-		accumulated = "1";
-	
-	execSync('fast -p ' + doc + ' ' + pb_filename);
-	execSync('fast -H 0 -a ' + accumulated + ' -x ' + csv_filename + ' ' + pb_filename + '> ' + html_filename);
-	var text = fs.readFileSync(html_filename);
-	fs.unlinkSync(pb_filename);
-	fs.unlinkSync(html_filename);
-	return text;
 }
 
-function getWebviewContent(context: vscode.ExtensionContext) {
-	var fs = require("fs");
-	var files = fs.readdirSync(path.join(vscode.workspace.rootPath,'./model'));
+function updateView(model_dir) {
 	var models = "";
+	var files = fs.readdirSync(model_dir);
 	for (var i=0; i <files.length; i++) {
 		models = models + `<option value="`+ files[i] + `">` + files[i] + `</option>`;
-	}
+	}	
 	var text = `<html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -133,6 +140,23 @@ function getWebviewContent(context: vscode.ExtensionContext) {
 	</body>
 	</html>`;
 	return text;
+}
+
+function getWebviewContent(context: vscode.ExtensionContext) {
+	var fs = require("fs");
+	var model_dir = path.join(vscode.workspace.rootPath,'./model');
+	if (!fs.existsSync(model_dir)) {
+		ghdownload({user: 'yijunyu', repo: 'vscode-fast', ref: 'model'}, model_dir)
+		.on('error', function (err) {
+			vscode.window.showErrorMessage("error in downloading: " + err);
+		})			
+		.on('end', function (err, stdout, stderr) {
+			vscode.window.showErrorMessage("downloaded model folder: " + model_dir);
+		});
+		return updateView(model_dir);
+	} else {
+		return updateView(model_dir);
+	}
 }
 
 let client: LanguageClient;
