@@ -12,7 +12,7 @@ import {
 const fs = require("fs");
 const path = require('path');
 const tempfile = require('tempfile');
-const wgetCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' --entrypoint wget yijun/fast ';
+const wgetCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' --entrypoint wget yijun/fast ';
 const unzipCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' --entrypoint unzip yijun/fast ';
 const fastCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' yijun/fast ';
 
