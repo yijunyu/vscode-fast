@@ -1,1 +1,1 @@
-image: node:alpine
+image: yijun/fast:conda
