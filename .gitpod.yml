@@ -1,1 +1,1 @@
-image: yijun/gitpod
+image: node:alpine
