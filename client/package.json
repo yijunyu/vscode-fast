@@ -18,11 +18,13 @@
 	},
 	"dependencies": {
 		"child_process": "^1.0.2",
+		"mocha": "^6.1.4",
+		"semver": "^6.0.0",
 		"tempfile": "2.0.0",
 		"vscode-languageclient": "^4.4.0"
 	},
 	"devDependencies": {
 		"@types/node": "^10.12.23",
-		"vscode": "^1.1.19"
+		"vscode": "^1.1.33"
 	}
 }

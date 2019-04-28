@@ -1,12 +1,2 @@
-image=yijun/fast:conda
-image=yijun/fast:latest
-case "$1" in
-gumtree|bash|ggnn|flatc|protoc|make|main_ggnn|wget|unzip)
-	entry=$1
-	shift
-	docker run --rm -v $(pwd):/e --entrypoint $entry -it $image $@
-	;;
-*)
-	docker run --rm -v $(pwd):/e -it $image $@
-	;;
-esac
+#!/bin/bash
+docker run --rm -v $(pwd):/e yijun/fast:latest $@
