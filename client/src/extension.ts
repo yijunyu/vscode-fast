@@ -22,7 +22,7 @@ function testProgram(message, doc) {
 	var cmd = fastCmd + " " + 'live_test' + " " + '--model_path=/model/' + model + " " + path.basename(doc);
 	var out = execSync(cmd, {
 		cwd: d,
-		timeout: 10000,
+		timeout: 15000,
 		stdio: "inherit"
 	});
 	console.log("DONE!" + out);
