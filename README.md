@@ -1,5 +1,5 @@
-# vscode-fast
-A Visual Studio Code extension for Algorithm Classification using [flattened AST](http://oro.open.ac.uk/59268/).
+# BigCode.Classify - a Visual Studio Code extension for Algorithm Classification using [flattened AST](http://oro.open.ac.uk/59268/).
+
 The Neural Networks currently supported are currently [Gated Graph Neural Networks](https://arxiv.org/abs/1511.05493)
 and [Tree-Based Convolutional Neural Networks](https://arxiv.org/abs/1409.5718).
 
