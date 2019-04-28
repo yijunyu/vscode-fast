@@ -3,13 +3,7 @@ A Visual Studio Code extension for Algorithm Classification using [flattened AST
 The Neural Networks currently supported are currently [Gated Graph Neural Networks](https://arxiv.org/abs/1511.05493)
 and [Tree-Based Convolutional Neural Networks](https://arxiv.org/abs/1409.5718).
 
-![Screencast](vscode-fast.gif)
-![Screencast](vscode-fast.mov)
-<video width="320" height="240" controls>
-  <source src="vscode-fast.mov" type="video/mp4">
-</video>
-
-
+![![Screencast](https://img.youtube.com/vi/VV2eDDyprmM/maxresdefault.jpg)](https://youtu.be/VV2eDDyprmM)
 
 ## Installation
 Before using the extension, you need to get the docker image of `fast` installed as follows:
