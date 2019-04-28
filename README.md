@@ -9,7 +9,7 @@ and [Tree-Based Convolutional Neural Networks](https://arxiv.org/abs/1409.5718).
 Before using the extension, you need to get the docker image of `fast` installed as follows:
 ```bash
 docker pull yijun/fast
-alias fast="docker run --rm -v $(pwd):/e yijun/fast:latest"
+alias fast="docker run --rm -v $(pwd):/e yijun/fast"
 ```
 
 ## Usage
