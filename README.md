@@ -3,7 +3,7 @@
 The Neural Networks supported are currently [Gated Graph Neural Networks](https://arxiv.org/abs/1511.05493)
 and [Tree-Based Convolutional Neural Networks](https://arxiv.org/abs/1409.5718).
 
-[![Screencast](http://img.youtube.com/vi/VV2eDDyprmM/0.jpg)](http://www.youtube.com/watch?v=VV2eDDyprmM "Screencast")
+[![Screencast](https://img.youtube.com/vi/VV2eDDyprmM/0.jpg)](https://www.youtube.com/watch?v=VV2eDDyprmM "Screencast")
 
 ## Installation
 Before using the extension, you need to get the docker image of `fast` installed as follows:

@@ -1,6 +1,7 @@
 {
 	"name": "fast",
-	"description": "Mark up source code by a fAST algorithm classifier",
+	"description": "A Visual Studio Code extension for Algorithm Classification using flattened AST",
+	"homepage": "https://github.com/yijunyu/vscode-fast/blob/master/README.md",
 	"author": "Yijun Yu, Nghi D. Q. Bui, and Lingxiao Jiang",
 	"license": "BSD",
 	"version": "0.0.3",
