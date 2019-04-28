@@ -4,6 +4,12 @@ The Neural Networks currently supported are currently [Gated Graph Neural Networ
 and [Tree-Based Convolutional Neural Networks](https://arxiv.org/abs/1409.5718).
 
 ![Screencast](vscode-fast.gif)
+![Screencast](vscode-fast.mov)
+<video width="320" height="240" controls>
+  <source src="vscode-fast.mov" type="video/mp4">
+</video>
+
+
 
 ## Installation
 Before using the extension, you need to get the docker image of `fast` installed as follows:
