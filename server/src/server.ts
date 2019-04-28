@@ -22,7 +22,6 @@ import { PassThrough } from 'stream';
 const fs = require("fs");
 const path = require('path');
 const tempfile = require('tempfile');
-const fastCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp yijun/fast ';
 
 function delay(milliseconds, count) {
 	return new Promise(function (resolve) {
@@ -135,60 +134,6 @@ documents.onDidChangeContent(change => {
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-	// In this simple example we get the settings for every validate run.
-	let settings = await getDocumentSettings(textDocument.uri);
-
-	// The validator creates diagnostics for all uppercase words length 2 and more
-	let text = textDocument.getText();
-	const fs = require('fs');
-	const path= require('path');
-	const tempfile = require('tempfile');
-	var ext = path.extname(textDocument.uri);
-	var src_filename = tempfile(ext);
-	var pb_filename = tempfile('.pb');
-	const w = fs.createWriteStream(src_filename);
-	const Readable = require('stream').Readable;
-	var s = new Readable();
-	s._read = function noop() {}; // redundant? see update below
-	s.push(text);
-	s.push(null);
-	s.pipe(w);
-	await delay(500, 1);
-	execSync(fastCmd + '-p ' + src_filename + ' ' + pb_filename);
-	var out = execSync(fastCmd + '-z -y1 ' + pb_filename);
-	let problems = 0;
-	let diagnostics: Diagnostic[] = [];
-	var lines = out.toString().split('\n');
-	var pos = 0;
-	var text_lines = text.split("\n");
-	for (var i=0; i<lines.length; i++) {
-		var values = lines[i].split(',');
-		if (values.length == 8) {
-			var id = +values[0];
-			var kind = values[1];
-			var lineno = +values[2];
-			var column = +values[3];
-			var end_lineno = +values[4];
-			var end_column = +values[5];
-			var weight = +values[6];
-			var color = values[7];
-			problems ++;
-			let diagnostic: Diagnostic = {
-				severity: DiagnosticSeverity.Warning,
-				range: {
-					start: textDocument.positionAt(textDocument.offsetAt({line: lineno - 1, character: 0})+column-1),
-					end: textDocument.positionAt(textDocument.offsetAt({line: end_lineno - 1, character: 0})+end_column-1)
-				},
-				message: `Element ${id} is of type ${kind} in ${color}.`,
-				source: 'AST'
-			};	
-			diagnostics.push(diagnostic);
-		}		
-	}
-	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
-	fs.unlinkSync(src_filename);
-	fs.unlinkSync(pb_filename);
 }
 
 connection.onDidChangeWatchedFiles(_change => {
@@ -231,26 +176,6 @@ connection.onCompletionResolve(
 		return item;
 	}
 );
-
-/*
-connection.onDidOpenTextDocument((params) => {
-	// A text document got opened in VSCode.
-	// params.uri uniquely identifies the document. For documents store on disk this is a file URI.
-	// params.text the initial full content of the document.
-	connection.console.log(`${params.textDocument.uri} opened.`);
-});
-connection.onDidChangeTextDocument((params) => {
-	// The content of a text document did change in VSCode.
-	// params.uri uniquely identifies the document.
-	// params.contentChanges describe the content changes to the document.
-	connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`);
-});
-connection.onDidCloseTextDocument((params) => {
-	// A text document got closed in VSCode.
-	// params.uri uniquely identifies the document.
-	connection.console.log(`${params.textDocument.uri} closed.`);
-});
-*/
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

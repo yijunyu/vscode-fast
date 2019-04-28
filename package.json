@@ -3,7 +3,7 @@
 	"description": "Mark up source code by a fAST algorithm classifier",
 	"author": "Yijun Yu, Nghi D. Q. Bui, and Lingxiao Jiang",
 	"license": "BSD",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/yijunyu/vscode-fast"
@@ -17,8 +17,8 @@
 		"vscode": "^1.25.0"
 	},
 	"activationEvents": [
-		"onCommand:bigCoding.start",
-		"onLanguage:cpp"
+		"onCommand:BigCode.classify",
+		"onLanguage:java"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
@@ -47,9 +47,9 @@
 		},
 		"commands": [
 			{
-				"command": "bigCoding.start",
-				"title": "Start new big coding session",
-				"category": "Big Coding"
+				"command": "BigCode.Classify",
+				"title": "Classify",
+				"category": "BigCode"
 			}
 		]
 	},

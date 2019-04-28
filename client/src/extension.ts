@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, commands, Uri, window } from 'vscode';
-import { execSync } from 'child_process';
+import { spawnSync, execSync } from 'child_process';
 
 import {
 	LanguageClient,
@@ -12,60 +12,45 @@ import {
 const fs = require("fs");
 const path = require('path');
 const tempfile = require('tempfile');
-const wgetCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' --entrypoint wget yijun/fast ';
-const unzipCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' --entrypoint unzip yijun/fast ';
-const fastCmd = 'docker run --rm -v $(pwd):/e -v /private:/private -v /tmp:/tmp -v ' + vscode.workspace.rootPath + ':' + vscode.workspace.rootPath + ' yijun/fast ';
+const fastCmd = 'fast ';
 
-function updateView3(message, doc, csv_filename, pb_filename, html_filename) {
-	vscode.window.showErrorMessage("model: " + message.model + " csv: " + csv_filename + " temp_pb: " + pb_filename);
-	var accumulated = "0";
-	if (message.attention === "accumulation") 
-		accumulated = "1";
-	
-	execSync(fastCmd + '-p ' + doc + ' ' + pb_filename);
-	execSync(fastCmd + '-H 0 -a ' + accumulated + ' -x ' + csv_filename + ' ' + pb_filename + '> ' + html_filename);
-	var text = fs.readFileSync(html_filename);
-	fs.unlinkSync(pb_filename);
-	fs.unlinkSync(html_filename);
-	return text;	
-}
-
-function fetchModel(model_dir) {
-	var zip_filename = tempfile('.zip');
-	execSync(wgetCmd + 'https://github.com/yijunyu/vscode-fast/raw/model/model.zip -O ' + zip_filename);
-	execSync(unzipCmd + zip_filename + ' -d ' + model_dir);
-	fs.unlinkSync(zip_filename);
+function testProgram(message, doc) {
+	var model = message.model.replace(/[\n\r]/g,"");
+	// var d = vscode.workspace.asRelativePath(""+doc) + path.; 
+	var d = path.dirname(doc);
+	model = model.split(")")[1];
+	var cmd = fastCmd + " " + 'live_test' + " " + '--model_path=/model/' + model + " " + path.basename(doc);
+	var out = execSync(cmd, {
+		cwd: d,
+		timeout: 10000,
+		stdio: "inherit"
+	});
+	console.log("DONE!" + out);
 }
 
 function getWebviewContent3(context: vscode.ExtensionContext, doc: String, message: any) {
+	testProgram(message, doc);
 	var dirname = path.dirname(doc);
 	var ext = path.extname(doc);
 	var filename = path.basename(doc, ext);
-	var pb_filename = tempfile('.pb');
-	var html_filename = tempfile('.html');
-	
-	// var pb_filename = path.join(dirname, filename + '.pb');
-	// var html_filename = path.join(dirname, filename + '.html');
-	var csv_filename = path.join(dirname, filename, filename + "_" 
-		+ (message.polling != ""? message.polling + "_" : "") 
-		+ (message.weight != "" ? message.weight + "_" : "") 
-		+ (message.node != "" ? message.node : "")
-		+ ".csv");
-
-	return updateView3(message, doc, csv_filename, pb_filename, html_filename);
+	var html_filename = path.join(dirname, filename + ".html");		
+	var text = fs.readFileSync(html_filename).toString();
+	return text;	
 }
 
 function updateView(model_dir) {
 	var models = "";
-	var files = fs.readdirSync(model_dir);
+	var out = execSync(fastCmd + ' model');
+	var files = out.toString().split("\n");
 	for (var i=0; i <files.length; i++) {
-		models = models + `<option value="`+ files[i] + `">` + files[i] + `</option>`;
+		if (files[i] != "")
+			models = models + `<option value="(`+ i + ")" + files[i] + `"> (` + i + "): " + files[i] + `</option>`;
 	}	
 	var text = `<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Cat Coding</title>
+		<title>Interpreting the algorithm classification results</title>
 	</head>
 	<body>
 		<form id="form">
@@ -73,26 +58,6 @@ function updateView(model_dir) {
 		<select id="model" name="model">`
 		+ models +
 		`</select>
-		<fieldset>
-			<legend>Aggregating method:</legend>
-			<input type="radio" name="polling" value=""> None<br>
-			<input type="radio" name="polling" value="sum_sigmoid" checked> Sum Sigmoid<br>
-			<input type="radio" name="polling" value="sum_softmax"> Sum Softmax<br>
-			<input type="radio" name="polling" value="normal"> Normal<br>
-			<input type="radio" name="polling" value="accumulation"> Accumulation<br>
-		</fieldset>
-		<fieldset>
-			<legend>Attention method:</legend>
-			<input type="radio" name="weight" value="attention_all_1" checked> All 1<br>
-			<input type="radio" name="weight" value="raw_attention" checked> Raw<br>
-			<input type="radio" name="weight" value="scaled_attention"> Scaled<br>
-		</fieldset>
-		<fieldset>
-			<legend>Node types:</legend>
-			<input type="radio" name="node" value="with_node_type_and_subtree_size" checked> With Node Type and Subtree Size<br>
-			<input type="radio" name="node" value="only_node_type"> Only Node Type<br>
-			<input type="radio" name="node" value="without_node_type"> Without Node Type<br>
-		</fieldset>
 		</form>
 		<div id="message"></div>
 		<script>
@@ -109,14 +74,8 @@ function updateView(model_dir) {
 			}
 
 			function post(event) {
-				var polling = get_value('polling');
-				var weight = get_value('weight');
-				var node = get_value('node');
 				var model_value = model.value;
 				vscode.postMessage({
-				    polling: polling,
-					weight: weight,
-					node: node,
 					model: model_value
 				});
 			}
@@ -145,23 +104,17 @@ let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
 	context.subscriptions.push(
-		vscode.commands.registerCommand('bigCoding.start', async () => {
+		vscode.commands.registerCommand('BigCode.Classify', async () => {
 			var doc = vscode.window.activeTextEditor.document.fileName;
-			// vscode.window.showErrorMessage(doc);
-
 			// Create and show panel
 			const panel = vscode.window.createWebviewPanel(
-				'Attention to Code: Configuration',
+				'GGNN: Configuration',
 				'Configuration',
 				vscode.ViewColumn.Two,
 				{	enableScripts: true,
 					retainContextWhenHidden: true,
 				}
 			);
-			var model_dir = vscode.workspace.rootPath;
-			if (!fs.existsSync(model_dir + "/model")) {
-				await fetchModel(model_dir);
-			} 		
 			// And set its HTML content
 			panel.webview.html = getWebviewContent(context);
 
@@ -170,11 +123,7 @@ export function activate(context: ExtensionContext) {
 				message => {
 					const panel = vscode.window.createWebviewPanel(
 						'Attention to Code: View',
-						path.basename(doc) + "(" 
-							+ message.attention + ","
-							+ message.weight + "," 
-							+ message.node + "," 
-							+ message.model + ")",
+						path.basename(doc) + message.model.split(")")[0] + ")",
 						vscode.ViewColumn.One,
 						{	enableScripts: true,
 							retainContextWhenHidden: true,
