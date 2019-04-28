@@ -1,2 +1,0 @@
-#!/bin/bash
-docker run --rm -v $(pwd):/e yijun/fast:latest $@
