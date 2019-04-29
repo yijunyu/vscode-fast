@@ -1,5 +1,6 @@
 {
 	"name": "fast",
+	"displayName": "vscode-fast",
 	"description": "A Visual Studio Code extension for Algorithm Classification using flattened AST",
 	"homepage": "https://github.com/yijunyu/vscode-fast/blob/master/README.md",
 	"author": "Yijun Yu, Nghi D. Q. Bui, and Lingxiao Jiang",
@@ -7,10 +8,10 @@
 	"version": "0.0.3",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/yijunyu/vscode-fast"
+		"url": "https://github.com/yijunyu/vscode-fast.git"
 	},
 	"publisher": "YijunYu",
-	"categories": [],
+	"categories": ["Programming Languages", "Deep Learning"],
 	"keywords": [
 		"multi-root ready"
 	],

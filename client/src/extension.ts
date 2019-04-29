@@ -34,7 +34,8 @@ function getWebviewContent3(context: vscode.ExtensionContext, doc: String, messa
 	var ext = path.extname(doc);
 	var filename = path.basename(doc, ext);
 	var html_filename = path.join(dirname, filename + ".html");		
-	var text = fs.readFileSync(html_filename).toString();
+	var text = "<h3 style='foreground-color:white;'>" + message.model + "</h3>" 
+				+ fs.readFileSync(html_filename).toString();
 	return text;	
 }
 
