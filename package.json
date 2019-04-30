@@ -11,9 +11,12 @@
 		"url": "https://github.com/yijunyu/vscode-fast.git"
 	},
 	"publisher": "YijunYu",
-	"categories": ["Programming Languages", "Deep Learning"],
+	"categories": ["Programming Languages"],
 	"keywords": [
-		"multi-root ready"
+		"Flattened Abstract Syntax Tree",
+		"Algorithm Classification",
+		"Gated Graph Neural Networks",
+		"Tree-Based Convolutional Neural Networks"
 	],
 	"engines": {
 		"vscode": "^1.25.0"
