@@ -19,7 +19,7 @@ function testProgram(message, doc) {
 	// var d = vscode.workspace.asRelativePath(""+doc) + path.; 
 	var d = path.dirname(doc);
 	model = model.split(")")[1];
-	var cmd = fastCmd + " " + 'live_test' + " " + '--model_path=/model/' + model + " " + path.basename(doc);
+	var cmd = fastCmd + " " + 'live_test' + " " + '--model_path=/model/' + model + " \"" + path.basename(doc) + "\"";
 	var out = execSync(cmd, {
 		cwd: d,
 		timeout: 15000,

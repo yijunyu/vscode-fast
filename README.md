@@ -6,10 +6,14 @@ and [Tree-Based Convolutional Neural Networks](https://arxiv.org/abs/1409.5718).
 [![Screencast](https://img.youtube.com/vi/VV2eDDyprmM/0.jpg)](https://www.youtube.com/watch?v=VV2eDDyprmM "Screencast")
 
 ## Installation
-Before using the extension, you need to get the docker image of `fast` installed as follows:
+Before using the extension, you need to save the following file to
+an executable bash script `fast` to a folder on the search path.
+The `fast` command can pull the docker image of `fast` if it has not been installed,
+then pass on the arguments to be processed by the docker image.
 ```bash
+#!/bin/bash
 docker pull yijun/fast
-alias fast="docker run --rm -v $(pwd):/e yijun/fast"
+docker run --rm -v "$(pwd)":/e yijun/fast
 ```
 
 ## Usage
@@ -17,7 +21,7 @@ alias fast="docker run --rm -v $(pwd):/e yijun/fast"
 
 2. Press ⌘ + ⇧ + P,  which will open a "Configuration" window that lists the pre-trained models of neural networks;
 
-INFO. You can also list these models using the following command:
+INFO. You can also list these models using the following command in the terminal:
 ```bash
 fast model
 ```
@@ -32,15 +36,17 @@ INFO. You can also assign a key binding to this command by Code > Preferences > 
 ]
 ```
 
-3. Select a pre-trained model from the "Model:" drop-down list in the "Configuration" window, which will generate an HTML file to be opened in a WebView window as a tab next to the code editor;
+3. Select a pre-trained model from the "Model:" drop-down list in the "Configuration" window, which will generate an HTML file to be opened in a WebView window as a tab next to the code editor. After the selection, try not to move your
+mouse away so it will open the HTML page after a few seconds.
 
 INFO. The colors of the tokens are assigned according to the attention score of the token for the neural network to predict the classification. 
-The closer it is on the spectrum to Red, the more important (red score = 1); the closer it is on the spectrum to blue, the less important (blue score = 0). For your information, this spectrum is called Hue in the HSB color scheme.
+The closer it is on the spectrum to Red, the more important (red score = 1); the closer it is on the spectrum to the
+background color (e.g., white), the less important it is (white score = 0). For your information, this spectrum is called Hue-Saturation-Brightness in the HSB color scheme. The token colors follow the hue, saturation, and brightness (HSB) spectrum, with full saturation=1 and brightness=1. The hue is a color analogous to the hotness, where background = 0 to red = 1, and any color in-between is determined by the attention score. 
 
-INFO. The title of the WebView tab is named after the source code file, annotated with a number indicating which model was used to generate the attention scores.
 
-INFO. At the end of the web page, you can see the classification results, i.e., the probabilities of the current program belong to each class. 
-According to our Dataset 1 of 10 sorting problems, collected from Github, the meaning of a class is the following: 
+INFO. The title of the WebView tab is named after the source code file, annotated with a number indicating which model was selected to generate the attention scores.
+
+INFO. At the end of the webview, you can see the classification results, i.e., the probabilities of the current program belong to each class. According to our Dataset 1 of 10 sorting problems, collected from Github, the meaning of a class is the following: 
 ```
 0 insertion-sort
 1 merge-sort
@@ -53,19 +59,18 @@ According to our Dataset 1 of 10 sorting problems, collected from Github, the me
 8 selection-sort
 9 bucket-sort
 ```
-A PNG image file generated highlights the predicted label in red, amongst the 10 probabilities bars.
+A PNG image file generated highlights the predicted label in blue if it is correct, or red if it is wrong, 
+amongst the probability distribution (10 bars).
 
-4. Select another pre-trained model from the "Configuration" window, another tab will be shown, which may highlight the tokens with different colors due to the change of the attention scores.
-
-The token colors follow the hue, saturation, and brightness (HSB) spectrum, with full saturation=1 and brightness=1. The hue is a color analogous to the hotness, where blue = 0 to red = 1, and any color in-between is determined by the attention score. 
+4. Select another pre-trained model from the "Configuration" window, another tab will be shown after a few seconds, which highlights different tokens in the code due to the change of the attention scores.
 
 5. You can rearrange the tabs to compare and contrast the effect of the visualizations.
 
 ## Datasets 
 
-Dataset 1: 10 sorting problems, collected from Github, which are insertion-sort, merge-sort, topological-sort, heap-sort, bubble-sort, radix-sort, shell-sort, quick-sort, selection-sort, bucket-sort.
+Dataset 1: 10 sorting problems, collected from Github [Bui et al. SANER'19, NL4SE@AAAI'18], which are insertion-sort, merge-sort, topological-sort, heap-sort, bubble-sort, radix-sort, shell-sort, quick-sort, selection-sort, bucket-sort.
 
-Dataset 2: 104 programming problems, which comprises of 52000 cpp files from the paper Convolutional Neural Networks over Tree Structures for Programming Language Processing, AAAI 2015.
+Dataset 2: 104 programming tasks at Peking University [Mou et al. AAAI'16], which comprises of 52000 cpp files from the paper Convolutional Neural Networks over Tree Structures for Programming Language Processing, AAAI 2015.
 
 ## References
 
