@@ -13,7 +13,7 @@ then pass on the arguments to be processed by the docker image.
 ```bash
 #!/bin/bash
 docker pull yijun/fast
-docker run --rm -v "$(pwd)":/e yijun/fast
+docker run --rm -v "$(pwd)":/e yijun/fast $@
 ```
 
 ## Usage
